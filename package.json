@@ -1,0 +1,33 @@
+{
+  "name": "yy-helper",
+  "private": true,
+  "version": "1.0.0",
+  "description": "YY自动送礼打赏工具",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "build:electron": "electron-builder",
+    "dev:electron": "electron ./electron/main.js",
+    "asar:unpack": "asar extract ./test/app.asar ./test/app/",
+    "asar:pack": "asar pack ./test/app/ ./test/app.asar"
+  },
+  "dependencies": {
+    "axios": "^0.27.2",
+    "node-fetch": "^2.6.7",
+    "portfinder": "^1.0.28",
+    "puppeteer-core": "^15.5.0",
+    "smart-buffer": "^4.2.0",
+    "ws": "^8.8.1",
+    "xxtea-node": "^1.1.4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^3.0.0",
+    "async": "^3.2.4",
+    "electron": "^19.0.9",
+    "electron-builder": "^23.1.0",
+    "element-plus": "^2.2.10",
+    "vite": "^3.0.0",
+    "vue": "^3.2.37"
+  }
+}
