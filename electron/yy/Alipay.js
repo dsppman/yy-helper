@@ -36,8 +36,7 @@ class Alipay {
     async open(payUrl, payPasswd) {
         const win = new BrowserWindow({
             webPreferences: {
-                // partition: require('crypto').randomUUID(),
-                // devTools: false
+                devTools: true
             }
         });
         await win.loadURL(payUrl)
@@ -51,13 +50,15 @@ class Alipay {
         if (!page) throw new Error("Unable to find puppeteer Page from BrowserWindow. Please report this.");
 
         try {
-            await page.waitForTimeout(5000);
-            await page.waitForSelector('#payPassword_container')
-            await page.mouse.move(560, 530);
-            await page.keyboard.type(payPasswd);
-            await page.waitForTimeout(1000)
-            await page.keyboard.press('Enter');
-            await page.waitForTimeout(5000)
+            const elementHandle = await page.waitForSelector('#channels > div > iframe');
+            const frame = await elementHandle.contentFrame();
+            const input = await frame.waitForSelector('#payPassword_rsainput', { timeout: 5000 });
+            // await page.mouse.move(560, 530);
+            await frame.waitForTimeout(2000);
+            await input.type(payPasswd, {delay: 200});
+            const btn = await frame.$('#validateButton');
+            await btn.click();
+            await frame.waitForTimeout(5000);
         } finally {
             await page.screenshot({ path: 'alipay.png', fullPage: true })
             await win.destroy()

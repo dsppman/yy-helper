@@ -1,61 +1,38 @@
-import {defineConfig, build as viteBuild } from 'vite'
-import {resolve} from "path";
+import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import { spawn } from "child_process";
 import electronPath from 'electron'
 import { build as electronBuild } from 'electron-builder';
 
-
-function electron(pluginConfig) {
-    const {main, preload} = pluginConfig
-    let viteConfig
+function electron() {
+    let config;
     return {
-        name: 'electron-build',
+        name: 'electron-plugin',
         configResolved(resolvedConfig) {
-            viteConfig = resolvedConfig
+            // 存储最终解析的配置
+            config = resolvedConfig
         },
         configureServer(server) {
             server.httpServer.on('listening', () => {
-                const {address, port} = server.httpServer.address()
-                const url = `http://${address}:${port}`
+                const { port } = server.httpServer.address();
                 const env = {
-                    DEBUG_URL: url,
-                    DEV: viteConfig.command === 'serve'
+                    DEBUG_URL: `http://localhost:${port}`
                 }
-                const child = spawn(electronPath, [main], { stdio: 'inherit', windowsHide: false,env });
-                child.on('close', function (code, signal) {
-                    if (code === null) {
-                        console.error(electron, 'exited with signal', signal);
-                        process.exit(1);
+                const app = spawn(
+                    electronPath,
+                    ['electron/main.js'],
+                    {
+                        stdio: 'inherit',
+                        env
                     }
+                );
+                app.on('exit', function (code) {
                     process.exit(code);
                 });
             })
+
         },
         async writeBundle() {
-            // await viteBuild({
-            //     configFile: false,
-            //     root: viteConfig.root,
-            //     build: {
-            //         ...viteConfig.build,
-            //         ssr: true,
-            //         emptyOutDir: false,
-            //         rollupOptions: {
-            //             input: {
-            //                 main,
-            //                 preload,
-            //             },
-            //             output: {
-            //                 format: 'cjs',
-            //                 entryFileNames:'[name].js',
-            //             },
-            //         },
-            //         commonjsOptions: {
-            //             exclude: '**/node_modules/*',
-            //             include: '**/*'
-            //         }
-            //     }
-            // });
             await electronBuild({
                 config: {
                     nsis: {
@@ -65,7 +42,7 @@ function electron(pluginConfig) {
                         target: 'nsis'
                     },
                     directories: {
-                        output: resolve(viteConfig.build.outDir, 'electron-out')
+                        output: './electron-dist'
                     },
                     extraMetadata: {
                         main: 'main.js'
@@ -73,9 +50,9 @@ function electron(pluginConfig) {
                     files: [
                         "package.json",
                         {
-                            "from": viteConfig.build.outDir,
+                            "from": config.build.outDir,
                             "to": "./",
-                            "filter": "!**/electron-out"
+                            // "filter": "!**!/electron-out"
                         },
                         {
                             "from": './electron/',
@@ -84,21 +61,11 @@ function electron(pluginConfig) {
                     ],
                 }
             })
-        },
-
+        }
     }
 }
 
-// https://vitejs.dev/config/
 export default defineConfig({
     base: './',
-    build: {
-        // outDir: resolve(__dirname, '.dist'),
-        minify: true,
-        emptyOutDir: true
-    },
-    plugins: [vue(), electron({
-        main: resolve(__dirname, 'electron/main.js'),
-        preload: resolve(__dirname, 'electron/preload.js'),
-    })]
-})
+    plugins: [vue(), electron()]
+});

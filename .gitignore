@@ -9,8 +9,11 @@ lerna-debug.log*
 
 node_modules
 dist
+electron-dist
+test
 dist-ssr
 *.local
+alipay.png
 
 # Editor directories and files
 .vscode/*

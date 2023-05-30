@@ -6,7 +6,9 @@ const yyHandler = require("./handler")
 
 
 function createWindow () {
-    if (!process.env.DEV) Menu.setApplicationMenu(null)
+    const isDebug = !!process.env.DEBUG_URL
+
+    !isDebug && Menu.setApplicationMenu(null)
     // Create the browser window.
     const mainWindow = new BrowserWindow({
         width: 1000,
@@ -14,21 +16,20 @@ function createWindow () {
         show: false,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
-            devTools: process.env.DEV
+            devTools: isDebug
         }
     })
     mainWindow.once('ready-to-show', mainWindow.show)
 
     // and load the index.html of the app.
-    if (process.env.DEV) {
+    if (isDebug) {
         mainWindow.loadURL(process.env.DEBUG_URL)
     } else {
-        mainWindow.loadFile(path.join(__dirname, 'index.html'))
+        mainWindow.loadFile('index.html')
     }
-    // mainWindow.loadFile('./.rollup/index.html')
 
     // Open the DevTools.
-    process.env.DEV && mainWindow.webContents.openDevTools()
+    isDebug && mainWindow.webContents.openDevTools()
     ipcMain.handle('yy:handler', yyHandler)
 }
 
