@@ -7,7 +7,7 @@ const Alipay = require("./yy/Alipay");
 async function createOrder(username, amount) {
     let response = await axios.post("https://pay.yy.com/userDepositCheckAction.action", new URLSearchParams({
         passport: username,
-        passport2: username,
+        rechargeAccount: username,
         duowanb: amount,
         bankId: "alipayDirectPay",
         sourcecode: "webzf_wgpay",
@@ -104,8 +104,11 @@ class Handler {
 
     static async addCredit(userData, form) {
         // const key = 'AB5173F582E36F80D93134500678F3ED53F0318A4CB7CD5640F11089CC5928A7B78E4DC75AFCD0E9720E5B9EE8F38111'
-
-        const {payUrl, key} = await createOrder(userData['username'], form['amount'])
+        console.log(userData);
+        var pattern = /username=(.+?);/;
+        var username = pattern.exec(userData["cookie"])?.[1];
+        console.log(username);
+        const {payUrl, key} = await createOrder(username, form['amount'])
         console.log("key: " + key)
         await Alipay.create().open(payUrl, form['alipayPassword'])
         const ret = await checkOrderSuccess(key)
