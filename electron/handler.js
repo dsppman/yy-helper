@@ -108,7 +108,7 @@ class Handler {
         var pattern = /username=(.+?);/;
         var username = pattern.exec(userData["cookie"])?.[1];
         console.log(username);
-        const {payUrl, key} = await createOrder(username, form['amount'])
+        const {payUrl, key} = await createOrder(userData['username'], form['amount'])
         console.log("key: " + key)
         await Alipay.create().open(payUrl, form['alipayPassword'])
         const ret = await checkOrderSuccess(key)

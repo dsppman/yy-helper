@@ -58,7 +58,7 @@ class Alipay {
             await input.type(payPasswd, {delay: 200});
             const btn = await frame.$('#validateButton');
             await btn.click();
-            await frame.waitForTimeout(5000);
+            await frame.waitForTimeout(8000);
         } finally {
             await page.screenshot({ path: 'alipay.png', fullPage: true })
             await win.destroy()
